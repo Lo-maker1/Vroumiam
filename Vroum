@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vroumiam | Menus. Commande. Vroum ! - Livraison Cotonou</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { primary: '#FF6B00', success: '#00C853', darkBg: '#0A0A0A', cardBg: '#161616' },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .orange-glow { box-shadow: 0 0 20px rgba(255, 107, 0, 0.2); }
+    </style>
+</head>
+<body class="bg-darkBg text-white font-sans antialiased" x-data="vroumStore">
+
+    <div class="bg-primary text-black text-center py-2 text-xs font-bold uppercase tracking-widest">
+        -20% sur ta première commande avec le code <span class="underline">VROUM229</span> 🛵
+    </div>
+
+    <header class="sticky top-0 z-50 bg-darkBg/80 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="index.html" class="text-2xl font-black italic tracking-tighter flex items-center">
+                <span class="text-primary">Vroum</span>iam
+            </a>
+            <div class="flex items-center space-x-4">
+                <div class="hidden md:flex items-center text-xs text-gray-400 bg-white/5 px-3 py-1.5 rounded-full">
+                    <span class="w-2 h-2 bg-success rounded-full mr-2 animate-pulse"></span>
+                    Cotonou, Fidjrossè
+                </div>
+                <button @click="cartOpen = true" class="relative p-2 bg-white/5 rounded-full hover:bg-white/10 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    <span x-show="cart.length > 0" x-text="cart.length" class="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-darkBg"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <section class="relative py-12 px-4 overflow-hidden">
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <h1 class="text-5xl md:text-7xl font-black mb-6 leading-none">
+                Faim ? On arrive en <span class="text-primary">25 min</span> chrono.
+            </h1>
+            <p class="text-gray-400 text-lg mb-8 max-w-xl mx-auto font-medium">
+                Les meilleurs restos de Cotonou livrés chez vous, au bureau ou à la plage.
+            </p>
+            
+            <div class="max-w-2xl mx-auto mb-10 relative">
+                <input type="text" placeholder="De quoi as-tu envie ? (Burger, Alloco, Pizza...)" 
+                       class="w-full bg-cardBg border-2 border-white/10 rounded-2xl py-5 px-6 pl-14 text-lg focus:border-primary outline-none orange-glow transition">
+                <svg class="w-6 h-6 absolute left-5 top-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <button onclick="window.location.href='restaurants.html'" class="absolute right-3 top-3 bottom-3 bg-primary hover:bg-orange-600 px-6 rounded-xl font-bold transition flex items-center">
+                    C'est parti
+                </button>
+            </div>
+
+            <div class="flex justify-center items-center space-x-8 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                <div class="flex items-center"><span class="text-success mr-2">●</span> 1,420 commandes cette heure</div>
+                <div class="flex items-center"><span class="text-primary mr-2">★</span> 4.9/5 satisfaction</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-8 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 overflow-x-auto flex space-x-4 no-scrollbar">
+            <template x-for="cat in categories">
+                <button class="flex-none bg-cardBg border border-white/5 px-6 py-3 rounded-2xl hover:border-primary transition group">
+                    <span class="text-2xl mr-2" x-text="cat.icon"></span>
+                    <span class="font-bold text-sm group-hover:text-primary" x-text="cat.name"></span>
+                </button>
+            </template>
+        </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-4 py-16">
+        <div class="flex justify-between items-end mb-10">
+            <div>
+                <h2 class="text-3xl font-black uppercase italic">Populaire à Cotonou</h2>
+                <p class="text-gray-500 font-medium">Les favoris de la communauté Vroum</p>
+            </div>
+            <a href="restaurants.html" class="text-primary font-bold hover:underline">Voir tout →</a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <template x-for="res in restaurants.slice(0,4)" :key="res.id">
+                <a :href="'menu.html?id=' + res.id" class="group block bg-cardBg rounded-[2rem] overflow-hidden border border-white/5 hover:border-white/20 transition duration-300">
+                    <div class="relative h-48 overflow-hidden">
+                        <img :src="res.img" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                        <div class="absolute top-4 right-4 bg-darkBg/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-primary italic">
+                            <span x-text="res.time"></span> min
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-black text-xl group-hover:text-primary transition" x-text="res.name"></h3>
+                            <span class="text-yellow-500 font-bold">★ <span x-text="res.rating" class="text-white"></span></span>
+                        </div>
+                        <p class="text-gray-500 text-sm font-medium mb-4" x-text="res.cuisine"></p>
+                        <div class="flex items-center text-xs font-bold text-success bg-success/10 w-fit px-2 py-1 rounded">
+                            Livraison Gratuite
+                        </div>
+                    </div>
+                </a>
+            </template>
+        </div>
+    </section>
+
+    <footer class="bg-black border-t border-white/5 py-12 px-4 mt-20">
+        <div class="max-w-7xl mx-auto text-center">
+            <p class="text-2xl font-black italic mb-4 text-primary">Vroumiam</p>
+            <p class="text-gray-500 text-sm mb-8">Fait avec ❤️ à Cotonou pour les gourmands.</p>
+            <div class="flex justify-center space-x-6 text-gray-400 text-xs font-bold uppercase tracking-widest">
+                <a href="#">Devenir Livreur</a>
+                <a href="#">Partenaires</a>
+                <a href="#">Aide</a>
+            </div>
+        </div>
+    </footer>
+
+    <div x-show="cartOpen" x-cloak class="fixed inset-0 z- overflow-hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="cartOpen = false"></div>
+        <div class="absolute inset-y-0 right-0 max-w-sm w-full bg-darkBg border-l border-white/10 p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-black italic">Ton Panier</h2>
+                <button @click="cartOpen = false" class="p-2 hover:bg-white/5 rounded-full">✕</button>
+            </div>
+            
+            <div class="space-y-4 overflow-y-auto max-h-[60vh] no-scrollbar">
+                <template x-for="(item, index) in cart" :key="index">
+                    <div class="flex items-center bg-cardBg p-3 rounded-2xl border border-white/5">
+                        <img :src="item.img" class="w-16 h-16 object-cover rounded-xl mr-4">
+                        <div class="flex-1">
+                            <p class="font-bold text-sm" x-text="item.name"></p>
+                            <p class="text-primary font-black text-sm"><span x-text="item.price"></span> FCFA</p>
+                        </div>
+                        <button @click="removeFromCart(index)" class="text-gray-600 hover:text-red-500">✕</button>
+                    </div>
+                </template>
+                <div x-show="cart.length === 0" class="text-center py-10 text-gray-500 font-medium">Ton panier est vide pour l'instant... 🍕</div>
+            </div>
+
+            <div class="absolute bottom-6 left-6 right-6 border-t border-white/10 pt-6">
+                <div class="flex justify-between text-xl font-black mb-6 italic">
+                    <span>Total</span>
+                    <span class="text-primary"><span x-text="totalPrice()"></span> FCFA</span>
+                </div>
+                <button onclick="window.location.href='checkout.html'" :disabled="cart.length === 0" 
+                        class="w-full bg-primary disabled:opacity-50 py-4 rounded-2xl font-black text-lg transition hover:bg-orange-600 orange-glow uppercase italic tracking-tighter">
+                    Passer la commande
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('vroumStore', () => ({
+                cartOpen: false,
+                cart: JSON.parse(localStorage.getItem('vroum_cart')) || [],
+                categories: [
+                    { name: 'Burger', icon: '🍔' },
+                    { name: 'Africain', icon: '🥘' },
+                    { name: 'Pizza', icon: '🍕' },
+                    { name: 'Healthy', icon: '🥗' },
+                    { name: 'Sushi', icon: '🥢' },
+                ],
+                restaurants: [
+                    { id: 1, name: 'Burger Palace', cuisine: 'Américain • Burgers', rating: 4.8, time: '20-30', img: 'https://picsum.photos/seed/burger/600/400' },
+                    { id: 2, name: 'Chez Maman', cuisine: 'Local • Béninois', rating: 4.9, time: '15-25', img: 'https://picsum.photos/seed/african/600/400' },
+                    { id: 3, name: 'Pizza Roma', cuisine: 'Italien • Pizzas', rating: 4.5, time: '30-40', img: 'https://picsum.photos/seed/pizza/600/400' },
+                    { id: 4, name: 'Le Glacier', cuisine: 'Desserts • Glaces', rating: 4.7, time: '10-20', img: 'https://picsum.photos/seed/icecream/600/400' },
+                    { id: 5, name: 'Sushi Zen', cuisine: 'Japonais • Frais', rating: 4.6, time: '35-45', img: 'https://picsum.photos/seed/sushi/600/400' },
+                    { id: 6, name: 'Green Bowl', cuisine: 'Healthy • Salades', rating: 4.4, time: '15-25', img: 'https://picsum.photos/seed/salad/600/400' },
+                    { id: 7, name: 'Tacos 229', cuisine: 'Mexicain • Tacos', rating: 4.3, time: '20-30', img: 'https://picsum.photos/seed/tacos/600/400' },
+                    { id: 8, name: 'Pasta Viva', cuisine: 'Italien • Pâtes', rating: 4.8, time: '25-35', img: 'https://picsum.photos/seed/pasta/600/400' },
+                ],
+                totalPrice() {
+                    return this.cart.reduce((sum, item) => sum + item.price, 0);
+                },
+                removeFromCart(index) {
+                    this.cart.splice(index, 1);
+                    localStorage.setItem('vroum_cart', JSON.stringify(this.cart));
+                }
+            }));
+        });
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tous les restaurants | Vroumiam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { primary: '#FF6B00', success: '#00C853', darkBg: '#0A0A0A', cardBg: '#161616' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-darkBg text-white antialiased" x-data="restoPage">
+    <header class="sticky top-0 z-50 bg-darkBg/80 backdrop-blur-md border-b border-white/5 h-16 flex items-center px-4">
+        <a href="index.html" class="text-2xl font-black italic text-primary">Vroumiam</a>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <h1 class="text-4xl font-black italic mb-8 uppercase tracking-tighter">Restaurants à Cotonou</h1>
+
+        <div class="flex space-x-3 overflow-x-auto no-scrollbar mb-10 pb-2">
+            <template x-for="cat in categories">
+                <button @click="filter = cat" 
+                        :class="filter === cat ? 'bg-primary border-primary text-black' : 'bg-cardBg border-white/5 text-gray-400'"
+                        class="flex-none px-6 py-2 rounded-full border font-bold text-sm transition" 
+                        x-text="cat"></button>
+            </template>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <template x-for="res in filteredRestos" :key="res.id">
+                <a :href="'menu.html?id=' + res.id" class="group bg-cardBg rounded-[2rem] overflow-hidden border border-white/5 hover:border-primary/50 transition duration-500 shadow-xl">
+                    <img :src="res.img" class="w-full h-56 object-cover group-hover:scale-105 transition duration-700">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-2xl font-black" x-text="res.name"></h3>
+                            <span class="bg-white text-black px-2 py-1 rounded-lg font-black text-sm" x-text="res.rating"></span>
+                        </div>
+                        <p class="text-gray-500 font-medium text-sm mb-4" x-text="res.cuisine"></p>
+                        <div class="flex items-center space-x-4 text-xs font-bold uppercase tracking-widest">
+                            <span class="text-primary"><span x-text="res.time"></span> MIN</span>
+                            <span class="text-gray-600">•</span>
+                            <span class="text-success">Livraison 0 FCFA</span>
+                        </div>
+                    </div>
+                </a>
+            </template>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('restoPage', () => ({
+                filter: 'Tout',
+                categories: ['Tout', 'Burger', 'Béninois', 'Italien', 'Healthy', 'Japonais', 'Mexicain'],
+                restaurants: [
+                    { id: 1, name: 'Burger Palace', cuisine: 'Burger', rating: 4.8, time: '20-30', img: 'https://picsum.photos/seed/burger/600/400' },
+                    { id: 2, name: 'Chez Maman', cuisine: 'Béninois', rating: 4.9, time: '15-25', img: 'https://picsum.photos/seed/african/600/400' },
+                    { id: 3, name: 'Pizza Roma', cuisine: 'Italien', rating: 4.5, time: '30-40', img: 'https://picsum.photos/seed/pizza/600/400' },
+                    { id: 4, name: 'Le Glacier', cuisine: 'Desserts', rating: 4.7, time: '10-20', img: 'https://picsum.photos/seed/icecream/600/400' },
+                    { id: 5, name: 'Sushi Zen', cuisine: 'Japonais', rating: 4.6, time: '35-45', img: 'https://picsum.photos/seed/sushi/600/400' },
+                    { id: 6, name: 'Green Bowl', cuisine: 'Healthy', rating: 4.4, time: '15-25', img: 'https://picsum.photos/seed/salad/600/400' },
+                    { id: 7, name: 'Tacos 229', cuisine: 'Mexicain', rating: 4.3, time: '20-30', img: 'https://picsum.photos/seed/tacos/600/400' },
+                    { id: 8, name: 'Pasta Viva', cuisine: 'Italien', rating: 4.8, time: '25-35', img: 'https://picsum.photos/seed/pasta/600/400' },
+                ],
+                get filteredRestos() {
+                    if (this.filter === 'Tout') return this.restaurants;
+                    return this.restaurants.filter(r => r.cuisine.includes(this.filter));
+                }
+            }));
+        });
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu | Vroumiam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { primary: '#FF6B00', success: '#00C853', darkBg: '#0A0A0A', cardBg: '#161616' }}}
+        }
+    </script>
+</head>
+<body class="bg-darkBg text-white antialiased" x-data="menuPage">
+    <div class="fixed top-0 inset-x-0 z-50 bg-darkBg/90 backdrop-blur-md h-16 flex items-center justify-between px-4 border-b border-white/5">
+        <a href="restaurants.html" class="p-2 bg-white/5 rounded-full">←</a>
+        <h2 class="font-black italic text-sm" x-text="resto.name"></h2>
+        <button @click="cartOpen = true" class="bg-primary text-black px-4 py-1.5 rounded-full font-black text-xs uppercase tracking-tighter">
+            Panier (<span x-text="cart.length"></span>)
+        </button>
+    </div>
+
+    <div class="h-64 relative pt-16">
+        <img :src="resto.img" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-darkBg to-transparent"></div>
+        <div class="absolute bottom-6 left-6">
+            <h1 class="text-4xl font-black italic mb-2" x-text="resto.name"></h1>
+            <div class="flex items-center space-x-3 text-sm font-bold">
+                <span class="text-success">★ <span x-text="resto.rating" class="text-white"></span></span>
+                <span class="text-gray-500">•</span>
+                <span class="text-gray-300 uppercase tracking-widest text-[10px]" x-text="resto.cuisine"></span>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-4xl mx-auto px-4 py-10 pb-32">
+        <div class="grid gap-6">
+            <template x-for="item in menu" :key="item.name">
+                <div class="flex items-center bg-cardBg p-4 rounded-[2rem] border border-white/5 hover:border-primary/30 transition">
+                    <img :src="item.img" class="w-24 h-24 object-cover rounded-2xl mr-6">
+                    <div class="flex-1">
+                        <h3 class="font-bold text-lg mb-1" x-text="item.name"></h3>
+                        <p class="text-gray-500 text-xs mb-3 font-medium" x-text="item.desc"></p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xl font-black italic text-primary"><span x-text="item.price"></span> FCFA</span>
+                            <button @click="addToCart(item)" class="bg-white/5 hover:bg-primary hover:text-black p-3 rounded-xl transition font-black">
+                                + Ajouter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </main>
+
+    <div x-show="cartOpen" x-cloak class="fixed inset-0 z-">
+        <div class="absolute inset-0 bg-black/60" @click="cartOpen = false"></div>
+        <div class="absolute inset-y-0 right-0 max-w-sm w-full bg-darkBg p-6 border-l border-white/10">
+            <h2 class="text-2xl font-black italic mb-8">Ton Panier</h2>
+            <div class="space-y-4 max-h-[70vh] overflow-y-auto no-scrollbar">
+                <template x-for="(c, i) in cart" :key="i">
+                    <div class="flex justify-between items-center bg-cardBg p-3 rounded-xl border border-white/5">
+                        <div>
+                            <p class="font-bold text-sm" x-text="c.name"></p>
+                            <p class="text-primary font-black text-xs" x-text="c.price + ' FCFA'"></p>
+                        </div>
+                        <button @click="cart.splice(i, 1); localStorage.setItem('vroum_cart', JSON.stringify(cart))" class="text-gray-500">✕</button>
+                    </div>
+                </template>
+            </div>
+            <div class="absolute bottom-6 left-6 right-6">
+                <button onclick="window.location.href='checkout.html'" class="w-full bg-primary py-4 rounded-2xl font-black uppercase italic tracking-tighter shadow-lg shadow-orange-600/20">Commander</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('menuPage', () => ({
+                id: new URLSearchParams(window.location.search).get('id') || 1,
+                cartOpen: false,
+                cart: JSON.parse(localStorage.getItem('vroum_cart')) || [],
+                resto: { name: 'Resto Vroum', rating: 4.8, cuisine: 'Plats variés', img: 'https://picsum.photos/seed/food/800/600' },
+                menu: [
+                    { name: 'Le Spécial Vroum', desc: 'Un mix secret de saveurs béninoises et modernes.', price: 4500, img: 'https://picsum.photos/seed/p1/200' },
+                    { name: 'Classic Burger Royale', desc: 'Bœuf grillé, cheddar double, oignons caramélisés.', price: 3500, img: 'https://picsum.photos/seed/p2/200' },
+                    { name: 'Pizza Cotonou', desc: 'Fromage local, piment, poulet fumé et oignons.', price: 5000, img: 'https://picsum.photos/seed/p3/200' },
+                    { name: 'Alloco & Poisson Braisé', desc: 'Bananes plantains frites avec son poisson frais.', price: 3000, img: 'https://picsum.photos/seed/p4/200' },
+                    { name: 'Healthy Bowl Veggie', desc: 'Quinoa, avocat, tomates cerises et citron vert.', price: 2500, img: 'https://picsum.photos/seed/p5/200' },
+                ],
+                addToCart(item) {
+                    this.cart.push(item);
+                    localStorage.setItem('vroum_cart', JSON.stringify(this.cart));
+                    this.cartOpen = true;
+                }
+            }));
+        });
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement | Vroumiam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#FF6B00', darkBg: '#0A0A0A', cardBg: '#161616' }}}}
+    </script>
+</head>
+<body class="bg-darkBg text-white p-4" x-data="{ loading: false, cart: JSON.parse(localStorage.getItem('vroum_cart')) || [] }">
+    <div class="max-w-2xl mx-auto pt-10">
+        <h1 class="text-4xl font-black italic mb-10 text-center uppercase tracking-tighter underline decoration-primary">Ta Commande</h1>
+        
+        <div class="bg-cardBg rounded-[2rem] p-8 border border-white/5 mb-8">
+            <div class="space-y-4 mb-8">
+                <template x-for="item in cart">
+                    <div class="flex justify-between items-center font-bold">
+                        <span x-text="item.name" class="text-gray-400"></span>
+                        <span x-text="item.price + ' FCFA'"></span>
+                    </div>
+                </template>
+                <div class="h-px bg-white/5 my-4"></div>
+                <div class="flex justify-between text-2xl font-black italic">
+                    <span>Total</span>
+                    <span class="text-primary"><span x-text="cart.reduce((s,i)=>s+i.price, 0)"></span> FCFA</span>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <input type="text" placeholder="Ton Nom Complet" class="w-full bg-darkBg border border-white/10 rounded-2xl p-4 outline-none focus:border-primary">
+                <input type="text" placeholder="Adresse Exacte (ex: Fidjrossè, Rue 1202)" class="w-full bg-darkBg border border-white/10 rounded-2xl p-4 outline-none focus:border-primary">
+                <input type="tel" placeholder="Numéro de Téléphone MoMo" class="w-full bg-darkBg border border-white/10 rounded-2xl p-4 outline-none focus:border-primary">
+            </div>
+        </div>
+
+        <button @click="loading = true; setTimeout(() => { localStorage.removeItem('vroum_cart'); window.location.href='track.html'; }, 2000)"
+                class="w-full bg-primary py-5 rounded-[2rem] font-black text-xl italic uppercase shadow-xl shadow-orange-600/20 flex justify-center items-center">
+            <span x-show="!loading">Vroum ! Confirmer</span>
+            <span x-show="loading" class="animate-spin text-2xl">🌀</span>
+        </button>
+    </div>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi Vroum | Vroumiam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#FF6B00', success: '#00C853', darkBg: '#0A0A0A' }}}}
+    </script>
+    <style>
+        .road { background: linear-gradient(90deg, transparent 50%, #161616 50%); background-size: 20px 100%; }
+        .scooter-anim { animation: drive 3s linear infinite; }
+        @keyframes drive { 0% { left: -10%; } 100% { left: 110%; } }
+    </style>
+</head>
+<body class="bg-darkBg text-white h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full text-center">
+        <div class="mb-12 relative h-1 bg-white/5 overflow-hidden rounded-full">
+            <div class="absolute inset-y-0 bg-primary scooter-anim w-10 h-1"></div>
+        </div>
+
+        <h1 class="text-6xl mb-6">🛵</h1>
+        <h2 class="text-4xl font-black italic mb-4 uppercase tracking-tighter">C'est en route !</h2>
+        <p class="text-gray-500 font-bold mb-10 uppercase tracking-widest text-xs">Arrivée estimée : <span class="text-success">18 minutes</span></p>
+
+        <div class="bg-[#161616] rounded-[2rem] p-8 border border-white/5 space-y-6">
+            <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 bg-success rounded-full flex items-center justify-center font-black">✓</div>
+                <div class="text-left"><p class="font-black text-sm italic">Commande Acceptée</p><p class="text-gray-500 text-xs">Le resto prépare ton festin.</p></div>
+            </div>
+            <div class="flex items-center space-x-4 opacity-50">
+                <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center font-black">2</div>
+                <div class="text-left"><p class="font-black text-sm italic">En route</p><p class="text-gray-500 text-xs">Le livreur Vroum a récupéré le sac.</p></div>
+            </div>
+        </div>
+
+        <button onclick="window.location.href='index.html'" class="mt-12 text-gray-500 font-bold hover:text-white transition uppercase text-xs tracking-widest">Retour à l'accueil</button>
+    </div>
+</body>
+</html>
+
+
